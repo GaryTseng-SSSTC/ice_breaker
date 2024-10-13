@@ -12,6 +12,7 @@ isort = "*"
 langchain = "*"
 langchain-community = "*"
 langchain-openai = "*"
+langchainhub = "*"
 
 [dev-packages]
 
