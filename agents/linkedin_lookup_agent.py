@@ -15,17 +15,22 @@ load_dotenv()
 
 
 def lookup(name: str) -> str:
+    # Initialize the ChatOpenAI model
     llm = ChatOpenAI(
         temperature=0,
         model_name="gpt-4o-mini",
         openai_api_key=os.environ["OPENAI_API_KEY"],
     )
+
+    # Define the prompt template for generating LinkedIn profile URL
     template = """given the full name {name_of_person} I want you to get it me a link to their Linkedin profile page.
                           Your answer should contain only a URL"""
 
     prompt_template = PromptTemplate(
         template=template, input_variables=["name_of_person"]
     )
+
+    # Define the tool for the agent to use
     tools_for_agent = [
         Tool(
             name="Crawl Google 4 linkedin profile page",
@@ -34,13 +39,16 @@ def lookup(name: str) -> str:
         )
     ]
 
+    # Set up the React agent
     react_prompt = hub.pull("hwchase17/react")
     agent = create_react_agent(llm=llm, tools=tools_for_agent, prompt=react_prompt)
     agent_executor = AgentExecutor(agent=agent, tools=tools_for_agent, verbose=True)
 
+    # Execute the agent with the formatted prompt
     result = agent_executor.invoke(
         input={"input": prompt_template.format_prompt(name_of_person=name)}
     )
 
+    # Extract and return the LinkedIn profile URL
     linked_profile_url = result["output"]
     return linked_profile_url
